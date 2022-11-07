@@ -582,7 +582,7 @@ namespace vcpkg::Export
         }
     }
 
-    void perform_and_exit(const VcpkgCmdArguments& args, const VcpkgPaths& paths, Triplet default_triplet)
+    void perform_and_exit(const VcpkgCmdArguments& args, const VcpkgPaths& paths, Triplet default_triplet, Triplet host_triplet)
     {
         if (paths.manifest_mode_enabled())
         {
@@ -655,7 +655,7 @@ namespace vcpkg::Export
 
         if (opts.prefab)
         {
-            Prefab::do_export(export_plan, paths, opts.prefab_options, default_triplet);
+            Prefab::do_export(export_plan, paths, opts.prefab_options, default_triplet, host_triplet);
         }
 
         Checks::exit_success(VCPKG_LINE_INFO);
@@ -664,8 +664,8 @@ namespace vcpkg::Export
     void ExportCommand::perform_and_exit(const VcpkgCmdArguments& args,
                                          const VcpkgPaths& paths,
                                          Triplet default_triplet,
-                                         Triplet /*host_triplet*/) const
+                                         Triplet host_triplet) const
     {
-        Export::perform_and_exit(args, paths, default_triplet);
+        Export::perform_and_exit(args, paths, default_triplet, host_triplet);
     }
 }

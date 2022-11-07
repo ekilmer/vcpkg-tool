@@ -638,7 +638,7 @@ namespace vcpkg
             {"CURRENT_BUILDTREES_DIR", buildpath},
             {"CURRENT_PACKAGES_DIR", paths.packages() / ("detect_compiler_" + triplet.canonical_name())},
             // The detect_compiler "port" doesn't depend on the host triplet, so always natively compile
-            {"_HOST_TRIPLET", triplet.canonical_name()},
+            {"_HOST_TRIPLET", abi_info.pre_build_info->host_triplet.canonical_name()},
         };
         get_generic_cmake_build_args(paths, triplet, abi_info.toolset.value_or_exit(VCPKG_LINE_INFO), cmake_args);
 
@@ -1245,7 +1245,7 @@ namespace vcpkg
             auto& abi_info = action.abi_info.value_or_exit(VCPKG_LINE_INFO);
 
             abi_info.pre_build_info = std::make_unique<PreBuildInfo>(
-                paths, action.spec.triplet(), var_provider.get_tag_vars(action.spec).value_or_exit(VCPKG_LINE_INFO));
+                paths, action.spec.triplet(), action.host_triplet, var_provider.get_tag_vars(action.spec).value_or_exit(VCPKG_LINE_INFO));
             abi_info.toolset = paths.get_toolset(*abi_info.pre_build_info);
 
             auto maybe_abi_tag_and_file = compute_abi_tag(paths, action, dependency_abis);
@@ -1621,8 +1621,9 @@ namespace vcpkg
 
     PreBuildInfo::PreBuildInfo(const VcpkgPaths& paths,
                                Triplet triplet,
+                               Triplet host_triplet,
                                const std::unordered_map<std::string, std::string>& cmakevars)
-        : triplet(triplet), m_paths(paths)
+        : triplet(triplet), host_triplet(host_triplet), m_paths(paths)
     {
         enum class VcpkgTripletVar
         {

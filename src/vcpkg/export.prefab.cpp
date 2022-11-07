@@ -234,11 +234,11 @@ namespace vcpkg::Export::Prefab
     }
 
     static std::unique_ptr<PreBuildInfo> build_info_from_triplet(
-        const VcpkgPaths& paths, const std::unique_ptr<CMakeVars::CMakeVarProvider>& provider, const Triplet& triplet)
+        const VcpkgPaths& paths, const std::unique_ptr<CMakeVars::CMakeVarProvider>& provider, const Triplet& triplet, const Triplet& host_triplet)
     {
         provider->load_generic_triplet_vars(triplet);
         return std::make_unique<PreBuildInfo>(
-            paths, triplet, provider->get_generic_triplet_vars(triplet).value_or_exit(VCPKG_LINE_INFO));
+            paths, triplet, host_triplet, provider->get_generic_triplet_vars(triplet).value_or_exit(VCPKG_LINE_INFO));
     }
 
     static bool is_supported(const PreBuildInfo& info)
@@ -249,12 +249,13 @@ namespace vcpkg::Export::Prefab
     void do_export(const std::vector<ExportPlanAction>& export_plan,
                    const VcpkgPaths& paths,
                    const Options& prefab_options,
-                   const Triplet& default_triplet)
+                   const Triplet& default_triplet,
+                   const Triplet& host_triplet)
     {
         auto provider = CMakeVars::make_triplet_cmake_var_provider(paths);
 
         {
-            auto build_info = build_info_from_triplet(paths, provider, default_triplet);
+            auto build_info = build_info_from_triplet(paths, provider, default_triplet, host_triplet);
             Checks::msg_check_maybe_upgrade(
                 VCPKG_LINE_INFO, is_supported(*build_info), msgExportPrefabRequiresAndroidTriplet);
         }
@@ -280,7 +281,7 @@ namespace vcpkg::Export::Prefab
             if (triplet_file.name.size() > 0)
             {
                 Triplet triplet = Triplet::from_canonical_name(std::move(triplet_file.name));
-                auto triplet_build_info = build_info_from_triplet(paths, provider, triplet);
+                auto triplet_build_info = build_info_from_triplet(paths, provider, triplet, host_triplet);
                 if (is_supported(*triplet_build_info))
                 {
                     auto cpu_architecture =

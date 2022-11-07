@@ -38,7 +38,7 @@ namespace vcpkg::Commands::Env
     void perform_and_exit(const VcpkgCmdArguments& args,
                           const VcpkgPaths& paths,
                           Triplet triplet,
-                          Triplet /*host_triplet*/)
+                          Triplet host_triplet)
     {
         const auto& fs = paths.get_filesystem();
 
@@ -51,7 +51,7 @@ namespace vcpkg::Commands::Env
         var_provider.load_generic_triplet_vars(triplet);
 
         const PreBuildInfo pre_build_info(
-            paths, triplet, var_provider.get_generic_triplet_vars(triplet).value_or_exit(VCPKG_LINE_INFO));
+            paths, triplet, host_triplet, var_provider.get_generic_triplet_vars(triplet).value_or_exit(VCPKG_LINE_INFO));
         const Toolset& toolset = paths.get_toolset(pre_build_info);
         auto build_env_cmd = make_build_env_cmd(pre_build_info, toolset);
 
